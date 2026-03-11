@@ -8,4 +8,4 @@ Description: Slang shading language compiler library
 Version: @SLANG_VERSION_NUMERIC@
 Libs: -L${libdir} -lslang-compiler
 Cflags: -I${includedir}
-Requires: miniz lz4
+Requires.private: miniz lz4
