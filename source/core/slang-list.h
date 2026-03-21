@@ -561,41 +561,28 @@ public:
 
     inline void swapElements(Index index1, Index index2) { swapElements(m_buffer, index1, index2); }
 
-    template<typename T2, typename Comparer>
-    Index binarySearch(const T2& obj, Comparer comparer) const
+    template<typename T2, typename Comparer = std::compare_three_way>
+    Index binarySearch(const T2& obj, Comparer comparer = {}) const
     {
-        Index imin = 0, imax = m_count - 1;
-        while (imax >= imin)
-        {
-            Index imid = imin + ((imax - imin) >> 1);
-            int compareResult = comparer(m_buffer[imid], obj);
-            if (compareResult == 0)
-                return imid;
-            else if (compareResult < 0)
-                imin = imid + 1;
-            else
-                imax = imid - 1;
-        }
-        // TODO: The return value on a failed search should be
-        // the bitwise negation of the index where `obj` should
-        // be inserted to be in the proper sorted location.
+        Index pos = lowerBound(obj, comparer);
+        if (pos < m_count && comparer(m_buffer[pos], obj) == 0)
+            return pos;
         return -1;
     }
 
-    template<typename T2>
-    Index binarySearch(const T2& obj) const
+    template<typename T2, typename Comparer = std::compare_three_way>
+    Index lowerBound(const T2& obj, Comparer comparer = {}) const
     {
-        return binarySearch(
-            obj,
-            [](T& curObj, const T2& thatObj) -> int
-            {
-                if (curObj < thatObj)
-                    return -1;
-                else if (curObj == thatObj)
-                    return 0;
-                else
-                    return 1;
-            });
+        Index imin = 0, imax = m_count;
+        while (imax > imin)
+        {
+            Index imid = imin + ((imax - imin) >> 1);
+            if (comparer(m_buffer[imid], obj) < 0)
+                imin = imid + 1;
+            else
+                imax = imid;
+        }
+        return imin;
     }
 
 private:
